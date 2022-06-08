@@ -27,15 +27,13 @@ else:
 
 apiKey = 'AIzaSyAHWIK6ZyAobRCxygl_s5dIEtiscJ-XJVo'
 
-playlist_URL = ""
 youtube = build('youtube', 'v3', developerKey=apiKey)
 
 def start_handler(update, context):
     update.message.reply_text("Please Send a Correct Youtube Playlist URL to Proccess.")
 
-videos_ids = []
 def get_videos_ids(update: Update, context: CallbackContext, next=''):
-    global playlist_URL, videos_ids
+    playlist_URL = ""
     videos_ids = []
     try:
         url = update.message.text
@@ -60,15 +58,14 @@ def get_videos_ids(update: Update, context: CallbackContext, next=''):
             get_videos_ids(next=nextPageToken)
         else:
             update.message.reply_text(str(len(videos_ids)) + " Videos Discoverd")
-            whole_playlist_duration = get_videos_durations()
+            whole_playlist_duration = get_videos_durations(videos_ids)
             update.message.reply_text(whole_playlist_duration)
+
     except Exception as error:
         update.message.reply_text("Sorry, Incorrect URL")
-        print(error)
+        # print(error)
 
-videos_durations = []
-def get_videos_durations():
-    global videos_ids, videos_durations
+def get_videos_durations(videos_ids):
     videos_durations = []
     for video_id in videos_ids:
         video_request = youtube.videos().list(
