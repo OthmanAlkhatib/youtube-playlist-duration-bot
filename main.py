@@ -25,14 +25,15 @@ else:
     logger.error("No mode specified")
     sys.exit(1)
 
-apiKey = 'AIzaSyAHWIK6ZyAobRCxygl_s5dIEtiscJ-XJVo'
+API_KEY = os.getenv("API_KEY")
 
-youtube = build('youtube', 'v3', developerKey=apiKey)
+youtube = build('youtube', 'v3', developerKey=API_KEY)
 
 def start_handler(update, context):
     update.message.reply_text("Please Send a Correct Youtube Playlist URL to Proccess.")
 
-def get_videos_ids(update: Update, context: CallbackContext, next=''):
+def get_videos_ids(update: Update, context: CallbackContext):
+    next = ''
     playlist_URL = ""
     videos_ids = []
     try:
@@ -44,7 +45,7 @@ def get_videos_ids(update: Update, context: CallbackContext, next=''):
             part='contentDetails',
             playlistId=playlist_URL,
             maxResults=50,
-            pageToken=next
+            pageToken=""
         )
 
         playlist_response = playlist_request.execute()
@@ -53,17 +54,29 @@ def get_videos_ids(update: Update, context: CallbackContext, next=''):
             video_id = i['contentDetails']['videoId']
             videos_ids.append(video_id)
 
-        if 'nextPageToken' in list(playlist_response.keys()):
+        while 'nextPageToken' in list(playlist_response.keys()):
             nextPageToken = playlist_response['nextPageToken']
-            get_videos_ids(next=nextPageToken)
-        else:
-            update.message.reply_text(str(len(videos_ids)) + " Videos Discoverd")
-            whole_playlist_duration = get_videos_durations(videos_ids)
-            update.message.reply_text(whole_playlist_duration)
+            next = nextPageToken
+
+            playlist_request = youtube.playlistItems().list(
+                part='contentDetails',
+                playlistId=playlist_URL,
+                maxResults=50,
+                pageToken=next
+            )
+            playlist_response = playlist_request.execute()
+
+            for i in playlist_response['items']:
+                video_id = i['contentDetails']['videoId']
+                videos_ids.append(video_id)
+
+        update.message.reply_text(str(len(videos_ids)) + " Videos Discoverd")
+        whole_playlist_duration = get_videos_durations(videos_ids)
+        update.message.reply_text(whole_playlist_duration)
 
     except Exception as error:
         update.message.reply_text("Sorry, Incorrect URL")
-        # print(error)
+        print(error)
 
 def get_videos_durations(videos_ids):
     videos_durations = []
