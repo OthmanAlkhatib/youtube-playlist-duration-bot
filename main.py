@@ -33,18 +33,10 @@ youtube = build('youtube', 'v3', developerKey=apiKey)
 def start_handler(update, context):
     update.message.reply_text("Please Send a Correct Youtube Playlist URL to Proccess.")
 
-def check_url(update: Update, context: CallbackContext):
-    url = update.message.text
-    if '=' in url:
-        playlist_URL = url[url.index('=')+1:]
-    videos_ids = []
-    videos_durations = []
-    update.message.bot.send_message(update.message.chat_id, "Procssing...")
-    # get_videos_ids()
-
 videos_ids = []
 def get_videos_ids(update: Update, context: CallbackContext, next=''):
-    global playlist_URL
+    global playlist_URL, videos_ids
+    videos_ids = []
     try:
         url = update.message.text
         if '=' in url:
@@ -76,6 +68,8 @@ def get_videos_ids(update: Update, context: CallbackContext, next=''):
 
 videos_durations = []
 def get_videos_durations():
+    global videos_ids, videos_durations
+    videos_durations = []
     for video_id in videos_ids:
         video_request = youtube.videos().list(
             part='contentDetails',
