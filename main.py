@@ -20,7 +20,7 @@ elif MODE == "prod":
     def run():
         logger.info("Start in PROD mode")
         updater.start_webhook(listen="0.0.0.0", port=int(os.environ.get("PORT", 5000)), url_path=TOKEN,
-                              webhook_url="https://{}.herokuapp.com/{}".format("ahsan-alhadeeth", TOKEN))
+                              webhook_url="https://{}.herokuapp.com/{}".format("youtube-playlist-duration-bot", TOKEN))
 else:
     logger.error("No mode specified")
     sys.exit(1)
@@ -67,7 +67,7 @@ def get_videos_ids(update: Update, context: CallbackContext, next=''):
             nextPageToken = playlist_response['nextPageToken']
             get_videos_ids(next=nextPageToken)
         else:
-            update.message.reply_text(str(len(videos_ids)) + " Videos Descoverd")
+            update.message.reply_text(str(len(videos_ids)) + " Videos Discoverd")
             whole_playlist_duration = get_videos_durations()
             update.message.reply_text(whole_playlist_duration)
     except Exception as error:
