@@ -33,20 +33,23 @@ youtube = build('youtube', 'v3', developerKey=API_KEY)
 
 def start_handler(update, context):
     username = update.message.chat.username
-    in_my_channel = getMembers.in_channel(username)
+    if username == None:
+        update.message.reply_text("Please make a Username for you Account")
+        return
 
+    in_my_channel = getMembers.in_channel(username)
     if in_my_channel :
         update.message.reply_text("Send Any Youtube Playlist URL to Proccess.")
-        print("IN")
     else:
         update.message.reply_text("Please Subscribe in This Channel First @ahsan_alhadeeth and Try Again")
-        print("not IN")
 
 def get_videos_ids(update: Update, context: CallbackContext):
     username = update.message.chat.username
+    if username == None:
+        update.message.reply_text("Please make a Username for you Account")
+        return
     if not getMembers.in_channel(username) :
         update.message.reply_text("Please Subscribe in This Channel First @ahsan_alhadeeth and Try Again")
-        print("not IN")
         return
 
     playlist_URL = ""
