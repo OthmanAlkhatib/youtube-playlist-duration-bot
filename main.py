@@ -5,6 +5,7 @@ import isodate
 import os
 import logging
 import sys
+import getMembers
 
 TOKEN = os.getenv("TOKEN")
 MODE = os.getenv("MODE")
@@ -29,17 +30,31 @@ API_KEY = os.getenv("API_KEY")
 
 youtube = build('youtube', 'v3', developerKey=API_KEY)
 
+
 def start_handler(update, context):
-    update.message.reply_text("Please Send a Correct Youtube Playlist URL to Proccess.")
+    username = update.message.chat.username
+    in_my_channel = getMembers.in_channel(username)
+
+    if in_my_channel :
+        update.message.reply_text("Send Any Youtube Playlist URL to Proccess.")
+        print("IN")
+    else:
+        update.message.reply_text("Please Subscribe in This Channel First @ahsan_alhadeeth and Try Again")
+        print("not IN")
 
 def get_videos_ids(update: Update, context: CallbackContext):
-    next = ''
+    username = update.message.chat.username
+    if not getMembers.in_channel(username) :
+        update.message.reply_text("Please Subscribe in This Channel First @ahsan_alhadeeth and Try Again")
+        print("not IN")
+        return
+
     playlist_URL = ""
     videos_ids = []
     try:
         url = update.message.text
         if '=' in url:
-            playlist_URL = url[url.index('=') + 1:]
+            playlist_URL = url[url.rindex('=') + 1:]
 
         playlist_request = youtube.playlistItems().list(
             part='contentDetails',
@@ -70,9 +85,12 @@ def get_videos_ids(update: Update, context: CallbackContext):
                 video_id = i['contentDetails']['videoId']
                 videos_ids.append(video_id)
 
-        update.message.reply_text(str(len(videos_ids)) + " Videos Discoverd")
+        update.message.reply_text(str(len(videos_ids)) + " Videos Discoverd...")
+        # whole_playlist_duration,videos_urls = get_videos_durations(videos_ids)
         whole_playlist_duration = get_videos_durations(videos_ids)
         update.message.reply_text(whole_playlist_duration)
+        # for i in range(len(videos_urls)):
+        #     update.message.reply_text("{0} https://www.youtube.com/watch?v={1}".format(str(i)+"_", videos_urls[i]))
 
     except Exception as error:
         update.message.reply_text("Sorry, Incorrect URL")
@@ -80,6 +98,7 @@ def get_videos_ids(update: Update, context: CallbackContext):
 
 def get_videos_durations(videos_ids):
     videos_durations = []
+    # videos_urls = []
     for video_id in videos_ids:
         video_request = youtube.videos().list(
             part='contentDetails',
@@ -88,11 +107,14 @@ def get_videos_durations(videos_ids):
         video_response = video_request.execute()
 
         video_duration = video_response['items'][0]['contentDetails']['duration']
-        videos_durations.append((video_duration))
+        videos_durations.append(video_duration)
+        # video_url = video_response['items'][0]['id']
+        # videos_urls.append(video_id)
 
     whole_playlist_duration = isodate.parse_duration(videos_durations[0])
     for i in range(1, len(videos_durations)):
         whole_playlist_duration += isodate.parse_duration(videos_durations[i])
+    # return str(whole_playlist_duration), videos_urls
     return str(whole_playlist_duration)
 
 if __name__ == "__main__":
