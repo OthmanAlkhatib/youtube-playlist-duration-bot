@@ -109,8 +109,13 @@ def get_videos_durations(videos_ids):
         )
         video_response = video_request.execute()
 
-        video_duration = video_response['items'][0]['contentDetails']['duration']
-        videos_durations.append(video_duration)
+        print(video_id)
+        print(video_response['items'])
+        try:
+            video_duration = video_response['items'][0]['contentDetails']['duration']
+            videos_durations.append(video_duration)
+        except Exception as error:
+            print(error)
         # video_url = video_response['items'][0]['id']
         # videos_urls.append(video_id)
 
