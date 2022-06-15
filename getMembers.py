@@ -1,8 +1,9 @@
 from telethon import TelegramClient
 import asyncio
+import os
 
-api_id = "11771632"
-api_hash = "2efc92a2cdbacebc0354b656111755ef"
+API_ID = os.getenv("API_ID")
+API_HASH = os.getenv("API_HASH")
 session = "othman"
 
 username = ''
@@ -12,7 +13,7 @@ class clt():
         self.global_client = None
 
     async def start(self):
-        client = TelegramClient(session, api_id, api_hash)
+        client = TelegramClient(session, API_ID, API_HASH)
         self.global_client = client
 
         await self.global_client.start()

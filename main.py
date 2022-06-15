@@ -109,8 +109,6 @@ def get_videos_durations(videos_ids):
         )
         video_response = video_request.execute()
 
-        print(video_id)
-        print(video_response['items'])
         try:
             video_duration = video_response['items'][0]['contentDetails']['duration']
             videos_durations.append(video_duration)
